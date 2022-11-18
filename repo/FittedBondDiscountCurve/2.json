@@ -1,0 +1,7 @@
+{
+  "type": "FittedBondDiscountCurve",
+  "accuracy": 0.01,
+  "max_evaluations": 100,
+  "simplex_lambda": 1.23,
+  "max_stationary_state_iterations": 100
+}

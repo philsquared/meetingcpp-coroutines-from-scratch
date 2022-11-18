@@ -1,0 +1,6 @@
+{
+  "type": "FixedRateBond",
+  "frequency": "Daily",
+  "day_counter": "Actual/365 (Fixed)",
+  "first_period_day_counter": "1/1"
+}

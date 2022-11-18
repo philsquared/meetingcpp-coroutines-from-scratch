@@ -1,0 +1,6 @@
+{
+  "type": "FixedRateBond",
+  "frequency": "Daily",
+  "day_counter": "Actual/Actual (ISMA)",
+  "first_period_day_counter": "Simple"
+}

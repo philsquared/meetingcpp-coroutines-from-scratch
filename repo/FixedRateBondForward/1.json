@@ -1,0 +1,13 @@
+{
+  "type": "FixedRateBondForward",
+  "fixed_coupon_bond": "FixedRateBond/2",
+  "day_counter": "Actual/365 (Fixed)",
+  "calendar": "Calendar/Switzerland",
+  "business_day_convention": "Following",
+  "settlement_days": 7,
+  "payoff": "ForwardTypePayoff/1.0",
+  "value_date": "2022/05/05",
+  "maturity_date": "2023/05/05",
+  "discount_curve": "Curve/3",
+  "income_discount_curve": "Curve/4"
+}
