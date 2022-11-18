@@ -6,8 +6,9 @@
 #include "Deserialiser.h"
 #include "Dependency.h"
 #include "Log.h"
-#include "Continuations.h"
+#include "TaskTracker.h"
 
+#include <coroutine>
 #include <span>
 #include <string>
 
@@ -16,43 +17,44 @@ namespace nq {
     struct DependencyAwaiter {
         bool shouldSuspend;
 
-        bool ready() const noexcept {
+        bool await_ready() const noexcept {
             return !shouldSuspend;
         }
-        bool suspend( FrameHandle<> handle ) noexcept {
+        bool await_suspend( std::coroutine_handle<> ) noexcept {
             LOG("suspending");
             return true;
         }
-        void resume() noexcept {
+        void await_resume() noexcept {
             LOG("resuming" );
         }
     };
 
     class Dependencies;
 
-    class BuildTask {
+    class BuildTask : TaskTracker {
     public:
-
-        struct Data {
+        struct promise_type {
             std::string id;
-            std::vector<Dependency> dependencies;
+            std::span<Dependency> dependencies; // from awaiter
             FObjectPtr obj = nullptr;
 
-            auto get_return_object()                { return BuildTask( Handle::from_data( *this ) ); }
-            auto initial_suspend() const -> bool    { return false; }
+            // Coroutine invoked methods
+            auto get_return_object()            { return BuildTask( Handle::from_promise( *this ) ); }
+            auto initial_suspend() const        { return std::suspend_never{}; }
+            auto final_suspend() const noexcept { return std::suspend_always{}; }
             void return_value( FObjectPtr&& new_obj ) {
                 LOG( "Setting return object for " << id << " (" << new_obj.get() << ")" );
                 obj = std::move(new_obj);
             }
-            auto await_transform( Dependencies&& dependencies ) -> DependencyAwaiter;
+            auto await_transform( Dependencies& dependencies ) -> DependencyAwaiter;
+            void unhandled_exception() const    { std::terminate(); }
         };
-
     private:
-        using Handle = FrameHandle<Data>;
+        using Handle = std::coroutine_handle<promise_type>;
         Handle handle;
-        auto data() const -> Data& {
+        auto promise() const -> promise_type& {
             assert( handle );
-            return handle.data();
+            return handle.promise();
         }
     public:
         explicit BuildTask( Handle handle ) noexcept
@@ -60,11 +62,11 @@ namespace nq {
             assert( handle );
         }
         ~BuildTask() {
-            destroyFrame();
+            destroyCoroutine();
         }
-        void destroyFrame() {
+        void destroyCoroutine() const {
             if( handle ) {
-                LOG( "(" << this << ") destroying frame Handle: " << handle.address() );
+                LOG( "(" << this << ") destroying coroutine Handle: " << handle.address() );
                 handle.destroy();
             }
             else
@@ -77,21 +79,21 @@ namespace nq {
             std::swap( handle, other.handle );
         }
         auto operator=( BuildTask&& other ) noexcept -> BuildTask& {
-            destroyFrame();
+            destroyCoroutine();
             handle = other.handle;
             other.handle = Handle();
             return *this;
         }
 
-        void setId( std::string const& id ) {
-            data().id = id;
+        void setId(std::string const& id ) {
+            promise().id = id;
         }
         auto getId() const {
-            return data().id;
+            return promise().id;
         }
 
         auto getDependencies() const -> std::span<Dependency> {
-            return data().dependencies;
+            return promise().dependencies;
         }
 
         auto operator <=> ( BuildTask const& other ) const noexcept {

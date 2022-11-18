@@ -13,81 +13,66 @@ namespace nq {
     template<typename T>
     auto build( Deserialiser in ) -> BuildTask;
 
+
     template<>
     auto build<FixedRateBondForward>( Deserialiser in ) -> BuildTask {
-        auto frame = makeFrame<BuildTask::Data> ( [in=std::move(in)](auto co) mutable {
+        auto obj = std::make_shared<FixedRateBondForward>();
+        obj->settlement_days << in["settlement_days"];
 
-            auto obj = std::make_shared<FixedRateBondForward>();
-            obj->settlement_days << in["settlement_days"];
+        Dependencies dependencies(in);
+        dependencies
+                .require( obj->discount_curve, "discount_curve" )
+                .require( obj->income_discount_curve, "income_discount_curve" )
+                .require( obj->fixed_coupon_bond, "fixed_coupon_bond" );
 
-            Dependencies dependencies(in);
-            dependencies
-                    .require( obj->discount_curve, "discount_curve" )
-                    .require( obj->income_discount_curve, "income_discount_curve" )
-                    .require( obj->fixed_coupon_bond, "fixed_coupon_bond" );
+        co_await dependencies;
 
-            return co.await( std::move(dependencies) ).then( [obj=std::move(obj)](auto co) {
-                    LOG( "Resumed" );
+        LOG( "Resumed" );
 
-                    // build phase ...
+        // build phase ...
 
-                    co.return_( obj );
-                } );
-        } );
-        return frame->data.get_return_object();
+        co_return obj;
     }
 
     template<>
     auto build<FixedRateBond>( Deserialiser in ) -> BuildTask {
-        auto frame = makeFrame<BuildTask::Data> ( [in=std::move(in)](auto co) mutable {
-            auto obj = std::make_shared<FixedRateBond>();
-            // ...
-            co.return_( obj );
-        } );
-        return frame->data.get_return_object();
+        auto obj = std::make_shared<FixedRateBond>();
+        // ...
+        co_return obj;
     }
 
     template<>
     auto build<FlatForward>( Deserialiser in ) -> BuildTask {
-        auto frame = makeFrame<BuildTask::Data> ( [in=std::move(in)](auto co) mutable {
-            auto obj = std::make_shared<FlatForward>();
-            // ...
-            co.return_( obj );
-        } );
-        return frame->data.get_return_object();
+        auto obj = std::make_shared<FlatForward>();
+        // ...
+        co_return obj;
     }
 
     template<>
     auto build<FittedBondDiscountCurve>( Deserialiser in ) -> BuildTask {
-        auto frame = makeFrame<BuildTask::Data> ( [in=std::move(in)](auto co) mutable {
-            LOG( "build<FittedBondDiscountCurve>" );
-            auto obj = std::make_shared<FittedBondDiscountCurve>();
+        LOG( "build<FittedBondDiscountCurve>" );
+        auto obj = std::make_shared<FittedBondDiscountCurve>();
 
-            obj->accuracy << in["accuracy"];
-            obj->max_evaluations << in["max_evaluations"];
-            obj->simplex_lambda << in["simplex_lambda"];
-            obj->max_stationary_state_iterations << in["max_stationary_state_iterations"];
+        obj->accuracy << in["accuracy"];
+        obj->max_evaluations << in["max_evaluations"];
+        obj->simplex_lambda << in["simplex_lambda"];
+        obj->max_stationary_state_iterations << in["max_stationary_state_iterations"];
 
-            co.return_( obj );
-        } );
-        return frame->data.get_return_object();
+        co_return obj;
     }
 
     template<>
     auto build<Curve>( Deserialiser in ) -> BuildTask {
-        auto frame = makeFrame<BuildTask::Data> ( [in=std::move(in)](auto co) mutable {
-            auto curveHolder = std::make_shared<std::shared_ptr<Curve>>();
-            Dependencies dependencies( in );
-            dependencies.require( *curveHolder, "instance" );
+        std::shared_ptr<Curve> curve;
+        Dependencies dependencies( in );
+        dependencies.require( curve, "instance" );
 
-            return co.await( std::move(dependencies) ).then( [curveHolder=std::move(curveHolder)](auto co) {
-                assert( *curveHolder.get() );
+        co_await dependencies;
 
-                LOG( "Curve resumed - returning the object" );
-                co.return_( *curveHolder );
-            } );
-        } );
-        return frame->data.get_return_object();
+        assert( curve.get() != nullptr );
+
+        LOG( "Curve resumed - co_returning the object" );
+        co_return curve;
     }
 
 

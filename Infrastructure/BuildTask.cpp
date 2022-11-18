@@ -3,8 +3,8 @@
 
 namespace nq {
 
-    auto BuildTask::Data::await_transform( Dependencies&& dependencies ) -> DependencyAwaiter {
-        this->dependencies = std::move( dependencies.unmetDependencies );
+    auto BuildTask::promise_type::await_transform( Dependencies& dependencies ) -> DependencyAwaiter {
+        this->dependencies = dependencies.unmetDependencies;
         return DependencyAwaiter{ !this->dependencies.empty() };
     }
 
@@ -13,11 +13,11 @@ namespace nq {
         if( !handle.done() ) {
             LOG( " - resuming" );
             handle.resume();
-            if( !handle.done())
+            if( !handle.done() )
                 return {};
         }
-        assert( data().obj );
-        return data().obj;
+        assert( promise().obj );
+        return promise().obj;
     }
 
 } // namespace nq

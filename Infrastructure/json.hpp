@@ -6451,7 +6451,7 @@ class json_sax_dom_callback_parser
     {
         JSON_ASSERT(!keep_stack.empty());
 
-        // do not handle this value if we know it would be added to a discarded
+        // do not Handle this value if we know it would be added to a discarded
         // container
         if (!keep_stack.back())
         {
@@ -6464,7 +6464,7 @@ class json_sax_dom_callback_parser
         // check callback
         const bool keep = skip_callback || callback(static_cast<int>(ref_stack.size()), parse_event_t::value, value);
 
-        // do not handle this value if we just learnt it shall be discarded
+        // do not Handle this value if we just learnt it shall be discarded
         if (!keep)
         {
             return {false, nullptr};

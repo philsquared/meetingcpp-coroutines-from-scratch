@@ -49,7 +49,9 @@ namespace nq {
             auto buildTasks = deserialiseAll( toLoad );
             toLoad.clear();
 
-            for( auto&& task :  buildTasks ) {
+            for(; buildTasks.hasValue(); buildTasks.next() ) {
+                auto task = std::move( buildTasks.currentTask() );
+
                 if( !resolveDependencies( task ) )
                     incompleteTasks.emplace_back( std::move( task ) );
             }
