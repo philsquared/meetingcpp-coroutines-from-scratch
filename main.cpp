@@ -13,7 +13,7 @@ int main() {
     auto start = std::chrono::high_resolution_clock::now();
 
     // Request objects
-    auto objects = repo.loadAndBuildObjects({ "FixedRateBondForward/1", "FixedRateBondForward/2" });
+    auto objects = repo.loadAndBuildObjects( { "FixedRateBondForward/1", "FixedRateBondForward/2" } );
 
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -21,7 +21,7 @@ int main() {
     LOG( "Completed in " << elapsed.count() << "ms" );
 
     // Check we actually loaded stuff
-    auto fixedRateBondForward = dynamic_pointer_cast<nq::FixedRateBondForward>(objects[1]);
-    auto curve = std::dynamic_pointer_cast<nq::FittedBondDiscountCurve>(fixedRateBondForward->discount_curve);
+    auto fixedRateBondForward = std::dynamic_pointer_cast<nq::FixedRateBondForward>( objects[1] );
+    auto curve = std::dynamic_pointer_cast<nq::FittedBondDiscountCurve>( fixedRateBondForward->discount_curve );
     assert( curve->simplex_lambda == 1.23 );
 }

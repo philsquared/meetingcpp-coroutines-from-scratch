@@ -6,16 +6,18 @@
 #include <vector>
 
 #include "../FObjects/FObject.h"
+#include "BuildTask.h"
 
 namespace nq {
 
     class Repo {
         std::unordered_map<std::string, FObjectPtr> cache;
+        std::vector<std::string> toLoad;
 
-        auto load( std::string const& id ) -> FObjectPtr;
-
+        auto requireObject( std::string const& id ) -> FObjectPtr;
+        auto resolveDependencies( BuildTask const& task ) -> bool;
     public:
-        auto loadAndBuildObjects( std::initializer_list<std::string> ids) -> std::vector<FObjectPtr>;
+        auto loadAndBuildObjects( std::initializer_list<std::string> ids ) -> std::vector<FObjectPtr>;
     };
 
 } // namespace nq
