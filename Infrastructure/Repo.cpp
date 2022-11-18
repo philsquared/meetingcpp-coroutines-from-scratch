@@ -45,7 +45,7 @@ namespace nq {
         std::ranges::for_each( ids, [this]( auto const& id ){ requireObject(id); } );
 
         std::vector<BuildTask> incompleteTasks;
-        while( !toLoad.empty() ) {
+        while( !toLoad.empty()) {
             auto buildTasks = deserialiseAll( toLoad );
             toLoad.clear();
 

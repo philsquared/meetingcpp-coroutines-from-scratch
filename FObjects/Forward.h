@@ -1,3 +1,7 @@
+//
+// Created by Phil Nash on 21/04/2022.
+//
+
 #ifndef NANOQUANT_FORWARD_H
 #define NANOQUANT_FORWARD_H
 

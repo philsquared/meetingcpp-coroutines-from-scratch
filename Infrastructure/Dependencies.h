@@ -26,7 +26,7 @@ namespace nq {
             };
             auto dependentId = in.get<std::string>( fieldName );
             LOG_VAR( dependentId );
-            unmetDependencies.emplace_back( std::move( dependentId ), std::move( setter ) );
+            unmetDependencies.emplace_back( std::move( dependentId), std::move( setter ) );
             return *this;
         }
     };

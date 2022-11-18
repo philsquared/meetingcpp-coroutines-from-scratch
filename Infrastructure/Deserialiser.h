@@ -24,6 +24,7 @@ namespace nq {
     public:
         explicit Deserialiser( nlohmann::json json ) : json( std::move( json ) ) {}
         Deserialiser( Deserialiser&& other ) : json( std::move( other.json ) ) {}
+        Deserialiser( Deserialiser const& other ) = default; // !TBD Only here so we can hold lambda in std::function
 
         template<typename T>
         auto get( std::string const& name ) const -> T {

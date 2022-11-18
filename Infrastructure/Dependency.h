@@ -13,8 +13,8 @@ namespace nq {
     public:
         std::string id;
         Dependency( std::string&& id, SetterFunction&& setter )
-        :   setter( std::move( setter ) ),
-            id( std::move(id ) )
+        : id( std::move(id ) ),
+          setter( std::move( setter ) )
         {}
 
         auto isMet() const -> bool {
